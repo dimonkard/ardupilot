@@ -246,7 +246,38 @@ jobs:
       # ============================================================
       # 12. Build ArduCopter
       # ============================================================
+      - name: Debug clock configuration
+        run: |
+          echo "========================================"
+          echo "Generated hwdef.h"
+          echo "========================================"
 
+          grep -n \
+            -E "OSCILLATOR|HSECLK|HSE|CLOCK" \
+            build/FK723M1-ZGT6/hwdef.h \
+            || true
+
+          echo
+          echo "========================================"
+          echo "Search STM32_HSECLK definitions"
+          echo "========================================"
+
+          grep -R \
+            -n \
+            "STM32_HSECLK" \
+            build/FK723M1-ZGT6 \
+            libraries/AP_HAL_ChibiOS/hwdef/common \
+            | head -100 \
+            || true
+
+          echo
+          echo "========================================"
+          echo "hwdef.dat"
+          echo "========================================"
+
+          cat \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+            
       - name: Build ArduCopter
         run: |
           echo "========================================"
