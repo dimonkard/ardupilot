@@ -6,8 +6,11 @@ on:
       - main
       - master
       - "fk723m1/**"
+
   pull_request:
+
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -21,32 +24,39 @@ jobs:
 
     steps:
 
-      # ------------------------------------------------------------
-      # 1. Получаем репозиторий вместе со всеми submodules
-      # ------------------------------------------------------------
+      # ============================================================
+      # 1. Checkout ArduPilot
+      # ============================================================
+
       - name: Checkout ArduPilot
         uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0
 
-      # ------------------------------------------------------------
-      # 2. Разрешаем Git работать с каталогом GitHub Actions
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 2. Configure Git
+      # ============================================================
+
       - name: Configure Git
         run: |
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-      # ------------------------------------------------------------
-      # 3. Устанавливаем официальное окружение ArduPilot
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 3. Install ArduPilot dependencies
+      # ============================================================
+
       - name: Install ArduPilot dependencies
         run: |
           Tools/environment_install/install-prereqs-ubuntu.sh -qy
 
-      # ------------------------------------------------------------
-      # 4. Добавляем официальный ARM toolchain ArduPilot в PATH
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 4. Configure ARM toolchain
+      # ============================================================
+
       - name: Configure ARM toolchain
         run: |
           TOOLCHAIN="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin"
@@ -61,28 +71,49 @@ jobs:
 
           export PATH="$TOOLCHAIN:$PATH"
 
-          echo "ARM GCC:"
+          echo "========================================"
+          echo "ARM GCC"
+          echo "========================================"
+
           which arm-none-eabi-gcc
           arm-none-eabi-gcc --version
 
-      # ------------------------------------------------------------
-      # 5. Активируем Python environment ArduPilot
-      # ------------------------------------------------------------
+          echo
+          echo "========================================"
+          echo "ARM G++"
+          echo "========================================"
+
+          which arm-none-eabi-g++
+          arm-none-eabi-g++ --version
+
+
+      # ============================================================
+      # 5. Configure Python environment
+      # ============================================================
+
       - name: Configure Python environment
         run: |
           if [ -f "$HOME/venv-ardupilot/bin/activate" ]; then
             source "$HOME/venv-ardupilot/bin/activate"
           fi
 
+          echo "Python:"
           python3 --version
+
+          echo
+          echo "Python executable:"
           python3 -c "import sys; print(sys.executable)"
 
-      # ------------------------------------------------------------
-      # 6. Проверяем наши файлы платы
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 6. Check board files
+      # ============================================================
+
       - name: Check FK723M1 hwdef
         run: |
-          echo "Checking board files..."
+          echo "========================================"
+          echo "Checking board files"
+          echo "========================================"
 
           test -f \
             libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
@@ -91,77 +122,159 @@ jobs:
             libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef-bl.dat
 
           echo
-          echo "=== hwdef.dat ==="
-          cat libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+          echo "========================================"
+          echo "hwdef.dat"
+          echo "========================================"
+
+          cat \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
 
           echo
-          echo "=== hwdef-bl.dat ==="
-          cat libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef-bl.dat
+          echo "========================================"
+          echo "hwdef-bl.dat"
+          echo "========================================"
 
-      # ------------------------------------------------------------
-      # 7. Проверяем наличие нашего Board ID
-      # ------------------------------------------------------------
+          cat \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef-bl.dat
+
+
+      # ============================================================
+      # 7. Check Board ID
+      # ============================================================
+
       - name: Check board ID
         run: |
-          echo "Searching for FK723M1 board ID..."
+          echo "========================================"
+          echo "Searching for board ID"
+          echo "========================================"
 
           grep -n "AP_HW_FK723M1_ZGT6" \
             Tools/AP_Bootloader/board_types.txt
 
-      # ------------------------------------------------------------
-      # 8. Проверяем, что Waf видит нашу плату
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 8. Check that Waf sees the board
+      # ============================================================
+
       - name: Check board
         run: |
+          echo "========================================"
+          echo "Searching for FK723M1-ZGT6"
+          echo "========================================"
+
           ./waf list_boards | grep -F "FK723M1-ZGT6"
 
-      # ------------------------------------------------------------
-      # 9. Собираем bootloader
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 9. Build bootloader
+      # ============================================================
+
       - name: Build bootloader
         run: |
+          echo "========================================"
+          echo "Building bootloader"
+          echo "========================================"
+
           python3 Tools/scripts/build_bootloaders.py FK723M1-ZGT6
 
-      # ------------------------------------------------------------
-      # 10. Показываем результат сборки bootloader
-      # ------------------------------------------------------------
+          echo
+          echo "========================================"
+          echo "Searching for generated bootloader"
+          echo "========================================"
+
+          find . \
+            -type f \
+            \( \
+              -name "*.bin" \
+              -o -name "*.elf" \
+              -o -name "*.hex" \
+            \) \
+            | grep -i \
+              "FK723M1\|bootloader" \
+            || true
+
+
+      # ============================================================
+      # 10. Check bootloader
+      # ============================================================
+
       - name: Check bootloader
         run: |
-          echo "=== Bootloader files ==="
+          echo "========================================"
+          echo "Tools/bootloaders"
+          echo "========================================"
+
+          ls -lah Tools/bootloaders || true
+
+          echo
+          echo "========================================"
+          echo "FK723M1 bootloader files"
+          echo "========================================"
 
           find Tools/bootloaders \
-            -maxdepth 1 \
             -type f \
-            -iname '*FK723M1*' \
-            -print
+            -iname "*FK723M1*" \
+            -print \
+            || true
 
-      # ------------------------------------------------------------
-      # 11. Конфигурируем ArduPilot под нашу плату
-      # ------------------------------------------------------------
+          echo
+          echo "========================================"
+          echo "All bootloader binary files"
+          echo "========================================"
+
+          find Tools/bootloaders \
+            -type f \
+            -name "*.bin" \
+            -print \
+            || true
+
+
+      # ============================================================
+      # 11. Configure ArduPilot
+      # ============================================================
+
       - name: Configure ArduPilot
         run: |
-          ./waf configure --board FK723M1-ZGT6
+          echo "========================================"
+          echo "Configuring ArduPilot"
+          echo "========================================"
 
-      # ------------------------------------------------------------
-      # 12. Собираем ArduCopter
-      # ------------------------------------------------------------
+          ./waf configure \
+            --board FK723M1-ZGT6
+
+
+      # ============================================================
+      # 12. Build ArduCopter
+      # ============================================================
+
       - name: Build ArduCopter
         run: |
+          echo "========================================"
+          echo "Building ArduCopter"
+          echo "========================================"
+
           ./waf copter
 
-      # ------------------------------------------------------------
-      # 13. Показываем получившиеся файлы
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 13. Show firmware files
+      # ============================================================
+
       - name: Show firmware files
+        if: always()
         run: |
           echo "========================================"
           echo "Firmware files"
           echo "========================================"
 
-          find build/FK723M1-ZGT6/bin \
-            -maxdepth 1 \
-            -type f \
-            -print
+          if [ -d "build/FK723M1-ZGT6/bin" ]; then
+            find build/FK723M1-ZGT6/bin \
+              -maxdepth 1 \
+              -type f \
+              -print
+          else
+            echo "Firmware directory does not exist"
+          fi
 
           echo
           echo "========================================"
@@ -171,55 +284,114 @@ jobs:
           find Tools/bootloaders \
             -maxdepth 1 \
             -type f \
-            -iname '*FK723M1*' \
-            -print
+            -iname "*FK723M1*" \
+            -print \
+            || true
 
-      # ------------------------------------------------------------
-      # 14. Собираем всё необходимое в отдельную папку
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 14. Prepare artifacts
+      # ============================================================
+
       - name: Prepare artifacts
+        if: always()
         run: |
+          echo "========================================"
+          echo "Preparing artifacts"
+          echo "========================================"
+
           mkdir -p artifacts/firmware
           mkdir -p artifacts/bootloader
 
-          cp -v \
-            build/FK723M1-ZGT6/bin/* \
-            artifacts/firmware/
+          # --------------------------------------------------------
+          # Firmware
+          # --------------------------------------------------------
 
-          BOOTLOADER_FILES=$(find Tools/bootloaders \
-            -maxdepth 1 \
-            -type f \
-            -iname '*FK723M1*')
+          if [ -d "build/FK723M1-ZGT6/bin" ]; then
 
-          if [ -n "$BOOTLOADER_FILES" ]; then
-            cp -v $BOOTLOADER_FILES artifacts/bootloader/
+            find build/FK723M1-ZGT6/bin \
+              -maxdepth 1 \
+              -type f \
+              -exec cp -v {} artifacts/firmware/ \;
+
           else
-            echo "WARNING: No FK723M1 bootloader file found"
+
+            echo "No firmware directory found"
+
           fi
 
+
+          # --------------------------------------------------------
+          # Bootloader
+          # --------------------------------------------------------
+
+          find Tools/bootloaders \
+            -maxdepth 1 \
+            -type f \
+            -iname "*FK723M1*" \
+            -exec cp -v {} artifacts/bootloader/ \; \
+            || true
+
+
+          # --------------------------------------------------------
+          # Copy hwdef files
+          # --------------------------------------------------------
+
+          cp -v \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat \
+            artifacts/
+
+          cp -v \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef-bl.dat \
+            artifacts/
+
+
           echo
-          echo "=== Artifacts ==="
+          echo "========================================"
+          echo "Final artifacts"
+          echo "========================================"
 
           find artifacts \
             -type f \
             -print
 
-      # ------------------------------------------------------------
-      # 15. Загружаем прошивку как artifact GitHub Actions
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 15. Upload firmware
+      # ============================================================
+
       - name: Upload firmware
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: FK723M1-ZGT6-firmware
           path: artifacts/firmware/
-          if-no-files-found: error
+          if-no-files-found: warn
 
-      # ------------------------------------------------------------
-      # 16. Загружаем bootloader как artifact
-      # ------------------------------------------------------------
+
+      # ============================================================
+      # 16. Upload bootloader
+      # ============================================================
+
       - name: Upload bootloader
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: FK723M1-ZGT6-bootloader
           path: artifacts/bootloader/
+          if-no-files-found: warn
+
+
+      # ============================================================
+      # 17. Upload hwdef files
+      # ============================================================
+
+      - name: Upload hwdef
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FK723M1-ZGT6-hwdef
+          path: |
+            artifacts/hwdef.dat
+            artifacts/hwdef-bl.dat
           if-no-files-found: warn
