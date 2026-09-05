@@ -1,0 +1,116 @@
+name: Build FK723M1-ZGT6
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "fk723m1/**"
+
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ArduPilot for FK723M1-ZGT6
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      # ------------------------------------------------------
+      # Checkout repository
+      # ------------------------------------------------------
+
+      - name: Checkout ArduPilot
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # ------------------------------------------------------
+      # Install ArduPilot build environment
+      # ------------------------------------------------------
+
+      - name: Install ArduPilot dependencies
+        run: |
+          Tools/environment_install/install-prereqs-ubuntu.sh -y
+
+      # ------------------------------------------------------
+      # Show toolchain information
+      # ------------------------------------------------------
+
+      - name: Show toolchain
+        run: |
+          python3 --version
+          git --version
+          arm-none-eabi-gcc --version
+
+      # ------------------------------------------------------
+      # Check board definition
+      # ------------------------------------------------------
+
+      - name: Check FK723M1 hwdef
+        run: |
+          test -f libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+          test -f libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef-bl.dat
+
+      # ------------------------------------------------------
+      # Build bootloader
+      # ------------------------------------------------------
+
+      - name: Build bootloader
+        run: |
+          Tools/scripts/build_bootloaders.py FK723M1-ZGT6
+
+      # ------------------------------------------------------
+      # Configure ArduPilot
+      # ------------------------------------------------------
+
+      - name: Configure ArduPilot
+        run: |
+          ./waf configure --board FK723M1-ZGT6
+
+      # ------------------------------------------------------
+      # Build ArduCopter
+      # ------------------------------------------------------
+
+      - name: Build ArduCopter
+        run: |
+          ./waf copter
+
+      # ------------------------------------------------------
+      # Show build results
+      # ------------------------------------------------------
+
+      - name: Show firmware files
+        run: |
+          echo "=== Firmware ==="
+          find build/FK723M1-ZGT6/bin -maxdepth 1 -type f -print
+
+          echo
+          echo "=== Bootloader ==="
+          find Tools/bootloaders -maxdepth 1 -type f \
+            -iname '*FK723M1*' -print
+
+      # ------------------------------------------------------
+      # Upload firmware
+      # ------------------------------------------------------
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: FK723M1-ZGT6-firmware
+          path: |
+            build/FK723M1-ZGT6/bin/*
+
+      # ------------------------------------------------------
+      # Upload bootloader
+      # ------------------------------------------------------
+
+      - name: Upload bootloader
+        uses: actions/upload-artifact@v4
+        with:
+          name: FK723M1-ZGT6-bootloader
+          path: |
+            Tools/bootloaders/*FK723M1*
