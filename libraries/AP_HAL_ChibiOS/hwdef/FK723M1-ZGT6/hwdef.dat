@@ -1,1 +1,110 @@
+# hw definition file for FK723M1-ZGT6
+# STM32H723ZGT6
+#
+# Initial experimental port:
+# - LED
+# - USART1
+# - USB OTG FS
+#
+# Sensors and other peripherals are intentionally not enabled yet.
 
+# ------------------------------------------------------------
+# MCU
+# ------------------------------------------------------------
+
+MCU STM32H7xx STM32H723xx
+
+# ------------------------------------------------------------
+# Board ID
+# ------------------------------------------------------------
+
+# Must exist in Tools/AP_Bootloader/board_types.txt
+APJ_BOARD_ID AP_HW_FK723M1_ZGT6
+
+# ------------------------------------------------------------
+# Clock
+# ------------------------------------------------------------
+
+# FK723M1-ZGT6 uses a 25 MHz HSE crystal.
+OSCILLATOR_HZ 25000000
+
+# ------------------------------------------------------------
+# Flash
+# ------------------------------------------------------------
+
+# STM32H723ZGT6 has 1 MB internal flash.
+FLASH_SIZE_KB 1024
+
+# First 128 KB are reserved for ArduPilot bootloader.
+FLASH_RESERVE_START_KB 128
+
+# ------------------------------------------------------------
+# ChibiOS system timer
+# ------------------------------------------------------------
+
+STM32_ST_USE_TIMER 12
+define CH_CFG_ST_RESOLUTION 16
+
+# ------------------------------------------------------------
+# Serial port order
+# ------------------------------------------------------------
+
+# SERIAL0 = USART1
+# SERIAL1 = USB OTG1
+SERIAL_ORDER USART1 OTG1
+
+# ------------------------------------------------------------
+# USB
+# ------------------------------------------------------------
+
+PA11 OTG_FS_DM OTG1
+PA12 OTG_FS_DP OTG1
+
+# ------------------------------------------------------------
+# USART1
+# ------------------------------------------------------------
+
+# Debug / telemetry UART
+#
+# PA9  = USART1_TX
+# PA10 = USART1_RX
+
+PA9 USART1_TX USART1
+PA10 USART1_RX USART1
+
+# ------------------------------------------------------------
+# SWD
+# ------------------------------------------------------------
+
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+# ------------------------------------------------------------
+# User LED
+# ------------------------------------------------------------
+
+# FK723M1-ZGT6 user LED:
+#
+# PG7 = LED
+# LED is active LOW.
+#
+# HIGH = LED OFF
+# LOW  = LED ON
+
+PG7 LED OUTPUT HIGH
+
+define HAL_GPIO_LED_ON 0
+
+# ------------------------------------------------------------
+# Parameter storage
+# ------------------------------------------------------------
+
+# Temporary first-stage configuration.
+#
+# We intentionally don't use internal flash storage yet.
+# Parameters will return to defaults after reboot.
+define HAL_USE_EMPTY_STORAGE 1
+
+# ------------------------------------------------------------
+# No IMU / BARO / GPS / CAN / SPI / I2C yet
+# ------------------------------------------------------------
