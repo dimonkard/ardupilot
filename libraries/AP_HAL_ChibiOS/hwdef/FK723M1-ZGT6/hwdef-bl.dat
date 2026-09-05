@@ -2,58 +2,28 @@
 # FK723M1-ZGT6
 # STM32H723ZGT6
 
-# ------------------------------------------------------------
-# MCU
-# ------------------------------------------------------------
-
 MCU STM32H7xx STM32H723xx
 
-# ------------------------------------------------------------
-# Clock
-# ------------------------------------------------------------
-
-OSCILLATOR_HZ 25000000
-
-# ------------------------------------------------------------
 # Board ID
-# ------------------------------------------------------------
-
 APJ_BOARD_ID AP_HW_FK723M1_ZGT6
 
-# ------------------------------------------------------------
-# Flash
-# ------------------------------------------------------------
+# External crystal
+OSCILLATOR_HZ 25000000
 
+# STM32H723ZGT6 has 1 MB internal flash
 FLASH_SIZE_KB 1024
 
-# Bootloader starts at address 0x08000000.
+# Bootloader starts at address 0
 FLASH_RESERVE_START_KB 0
 
-# Main ArduPilot firmware starts after the bootloader.
-#
-# Must match FLASH_RESERVE_START_KB in hwdef.dat.
+# Main firmware starts after 128 KB bootloader
 FLASH_BOOTLOADER_LOAD_KB 128
 
 # ------------------------------------------------------------
-# Serial ports
+# Serial port used by bootloader
 # ------------------------------------------------------------
 
-# Bootloader will be accessible through:
-#   USB OTG1
-#   USART1
-
-SERIAL_ORDER OTG1 USART1
-
-# ------------------------------------------------------------
-# USB
-# ------------------------------------------------------------
-
-PA11 OTG_FS_DM OTG1
-PA12 OTG_FS_DP OTG1
-
-# ------------------------------------------------------------
-# USART1
-# ------------------------------------------------------------
+SERIAL_ORDER USART1
 
 PA9 USART1_TX USART1
 PA10 USART1_RX USART1
@@ -66,7 +36,7 @@ PA13 JTMS-SWDIO SWD
 PA14 JTCK-SWCLK SWD
 
 # ------------------------------------------------------------
-# LED
+# User LED
 # ------------------------------------------------------------
 
 PG7 LED OUTPUT HIGH
@@ -74,7 +44,8 @@ PG7 LED OUTPUT HIGH
 define HAL_GPIO_LED_ON 0
 
 # ------------------------------------------------------------
-# Storage
+# No parameter storage in bootloader
 # ------------------------------------------------------------
 
 define HAL_USE_EMPTY_STORAGE 1
+define HAL_STORAGE_SIZE 16384
