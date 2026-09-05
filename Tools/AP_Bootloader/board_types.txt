@@ -636,6 +636,7 @@ AP_HW_SVehicle-E2                    6110
 
 # IDs 6120-6129 reserved for Partizan Security s.r.o
 AP_HW_PILOTIX                          6120
+AP_HW_FK723M1_ZGT6                     6121
 
 # IDs 6600-6699 reserved for Eagle Eye Drones
 
