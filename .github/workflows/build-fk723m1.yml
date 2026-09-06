@@ -315,8 +315,33 @@ jobs:
           echo "Building ArduCopter"
           echo "========================================"
 
+          set +e
           ./waf copter
+          BUILD_RESULT=$?
+          set -e
 
+          echo
+          echo "========================================"
+          echo "Linker map"
+          echo "========================================"
+
+          find build/FK723M1-ZGT6 \
+            -name "Linker.map" \
+            -type f \
+            -print \
+            || true
+
+          if [ -f build/FK723M1-ZGT6/Linker.map ]; then
+            echo
+            echo "Linker.map size:"
+            ls -lh build/FK723M1-ZGT6/Linker.map
+
+            echo
+            echo "Last 150 lines:"
+            tail -150 build/FK723M1-ZGT6/Linker.map
+          fi
+
+          exit "$BUILD_RESULT"
 
       # ============================================================
       # 13. Show firmware files
@@ -456,4 +481,12 @@ jobs:
           path: |
             artifacts/hwdef.dat
             artifacts/hwdef-bl.dat
+          if-no-files-found: warn
+
+      - name: Upload linker map
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FK723M1-ZGT6-linker-map
+          path: build/FK723M1-ZGT6/Linker.map
           if-no-files-found: warn
