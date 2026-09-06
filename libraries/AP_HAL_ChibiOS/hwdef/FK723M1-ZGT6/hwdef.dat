@@ -71,10 +71,20 @@ define HAL_STORAGE_SIZE 16384
 # No ADC pins or DMA streams are configured yet.
 define HAL_USE_ADC FALSE
 
-# Reduce firmware size for the 1 MiB internal flash.
+# STM32H723ZGT6 has only 1 MiB internal flash.
 include ../include/minimize_features.inc
 
-# No logging backend is needed during initial board bring-up.
+# ------------------------------------------------------------
+# Initial board bring-up
+# ------------------------------------------------------------
+
+# No logging storage is available yet.
 define HAL_LOGGING_ENABLED 0
+
+# Not required for initial UART/MAVLink bring-up.
+define AP_RANGEFINDER_ENABLED 0
+define AP_OPTICALFLOW_ENABLED 0
+define AC_PRECLAND_ENABLED 0
+define AP_FENCE_ENABLED 0
 
 define AP_BOOTLOADER_FLASHING_ENABLED 0
