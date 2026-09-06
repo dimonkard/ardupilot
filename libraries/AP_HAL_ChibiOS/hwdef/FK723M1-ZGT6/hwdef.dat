@@ -20,7 +20,7 @@ MCU STM32H7xx STM32H723xx
 APJ_BOARD_ID AP_HW_FK723M1_ZGT6
 
 # External crystal
-OSCILLATOR_HZ 25000000
+OSCILLATOR_HZ 15000000
 
 # STM32H723ZGT6 has 1 MB internal flash
 FLASH_SIZE_KB 1024
@@ -65,6 +65,18 @@ PA14 JTCK-SWCLK SWD
 PG7 LED OUTPUT HIGH
 
 # ------------------------------------------------------------
+# microSD
+# ------------------------------------------------------------
+
+PC12 SDMMC1_CK SDMMC1
+PD2  SDMMC1_CMD SDMMC1
+
+PC8  SDMMC1_D0 SDMMC1
+PC9  SDMMC1_D1 SDMMC1
+PC10 SDMMC1_D2 SDMMC1
+PC11 SDMMC1_D3 SDMMC1
+
+# ------------------------------------------------------------
 # Parameter storage
 # ------------------------------------------------------------
 
@@ -84,7 +96,7 @@ include ../include/minimize_features.inc
 # ------------------------------------------------------------
 
 # No logging storage is available yet.
-define HAL_LOGGING_ENABLED 0
+define HAL_LOGGING_ENABLED 1
 
 # Not required for initial UART/MAVLink bring-up.
 define AP_RANGEFINDER_ENABLED 0
