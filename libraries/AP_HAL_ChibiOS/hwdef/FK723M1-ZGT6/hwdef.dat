@@ -37,8 +37,13 @@ define CH_CFG_ST_RESOLUTION 16
 # Serial ports
 # ------------------------------------------------------------
 
-# SERIAL0 = USART1
-SERIAL_ORDER USART1
+# USB = SERIAL0
+# USART1 = SERIAL1
+SERIAL_ORDER OTG1 USART1
+
+# USB
+PA11 OTG_HS_DM OTG1
+PA12 OTG_HS_DP OTG1
 
 # USART1
 PA9 USART1_TX USART1
