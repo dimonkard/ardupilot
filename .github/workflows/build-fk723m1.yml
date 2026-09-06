@@ -302,6 +302,16 @@ jobs:
       - name: Build ArduCopter
         run: |
           echo "========================================"
+          echo "Generated feature configuration"
+          echo "========================================"
+
+          grep -n -E \
+            "HAL_LOGGING_ENABLED|AP_RANGEFINDER_ENABLED|AP_OPTICALFLOW_ENABLED|AC_PRECLAND_ENABLED|AP_FENCE_ENABLED|OSD_ENABLED|HAL_MSP_ENABLED" \
+            build/FK723M1-ZGT6/hwdef.h \
+            || true
+
+          echo
+          echo "========================================"
           echo "Building ArduCopter"
           echo "========================================"
 
