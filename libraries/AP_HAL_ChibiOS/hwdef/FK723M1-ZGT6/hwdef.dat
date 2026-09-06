@@ -97,12 +97,11 @@ include ../include/minimize_features.inc
 # Initial board bring-up
 # ------------------------------------------------------------
 
+# allow running without physical barometer
 define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
-define HAL_USE_ADC FALSE
-
-define HAL_USE_EMPTY_STORAGE 1
-define HAL_STORAGE_SIZE 16384
+# temporary fake gyro + accelerometer
+define AP_INERTIALSENSOR_DUMMY_ENABLED 1
 
 define HAL_LOGGING_ENABLED 1
 
