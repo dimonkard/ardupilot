@@ -56,9 +56,8 @@ PA14 JTCK-SWCLK SWD
 # ------------------------------------------------------------
 
 # FK723M1 user LED is on PG7 and is active-low
+# HAL_GPIO_LED_ON defaults to 0 in ArduPilot.
 PG7 LED OUTPUT HIGH
-
-define HAL_GPIO_LED_ON 0
 
 # ------------------------------------------------------------
 # Parameter storage
