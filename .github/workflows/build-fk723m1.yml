@@ -277,6 +277,15 @@ jobs:
 
           cat \
             libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+
+      - name: Check final hwdef
+        run: |
+          echo "=== FK723M1-ZGT6 hwdef.dat ==="
+          cat libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+          echo
+          echo "=== minimize_features check ==="
+          grep -n "minimize_features" \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat || true
             
       - name: Build ArduCopter
         run: |
