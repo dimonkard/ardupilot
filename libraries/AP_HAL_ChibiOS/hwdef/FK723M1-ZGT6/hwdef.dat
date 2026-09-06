@@ -74,4 +74,7 @@ define HAL_USE_ADC FALSE
 # Reduce firmware size for the 1 MiB internal flash.
 include ../include/minimize_features.inc
 
+# No logging backend is needed during initial board bring-up.
+define HAL_LOGGING_ENABLED 0
+
 define AP_BOOTLOADER_FLASHING_ENABLED 0
