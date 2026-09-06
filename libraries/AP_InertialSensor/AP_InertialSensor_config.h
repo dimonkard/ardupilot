@@ -24,6 +24,14 @@
 #define AP_INERTIALSENSOR_ALLOW_NO_SENSORS 0
 #endif
 
+
+// Diagnostic dummy IMU.
+// Allows AP_InertialSensor_NONE to be used on non-ESP32 boards.
+#ifndef AP_INERTIALSENSOR_DUMMY_ENABLED
+#define AP_INERTIALSENSOR_DUMMY_ENABLED 0
+#endif
+
+
 // support for boards forcing on a third IMU instance in case the
 // first two fail:
 #ifndef AP_INERTIALSENSOR_FORCE_ENABLE_NONISOLATED_INSTANCE
