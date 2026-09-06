@@ -278,14 +278,26 @@ jobs:
           cat \
             libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
 
-      - name: Check final hwdef
+      - name: Check generated feature defines
         run: |
-          echo "=== FK723M1-ZGT6 hwdef.dat ==="
-          cat libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat
+          echo "========================================"
+          echo "Generated feature defines"
+          echo "========================================"
+
+          grep -n -E \
+            "OSD_ENABLED|HAL_MSP_ENABLED|HAL_LOGGING_ENABLED|HAL_GYROFFT_ENABLED|MODE_TURTLE_ENABLED|AP_GPS_BACKEND_DEFAULT_ENABLED|HAL_MOUNT_ENABLED|AP_SCRIPTING_ENABLED" \
+            build/FK723M1-ZGT6/hwdef.h \
+            || true
+
           echo
-          echo "=== minimize_features check ==="
-          grep -n "minimize_features" \
-            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat || true
+          echo "========================================"
+          echo "Source hwdef"
+          echo "========================================"
+
+          grep -n -E \
+            "minimize_features|HAL_LOGGING_ENABLED" \
+            libraries/AP_HAL_ChibiOS/hwdef/FK723M1-ZGT6/hwdef.dat \
+            || true
             
       - name: Build ArduCopter
         run: |
