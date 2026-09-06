@@ -140,6 +140,16 @@
 #define STM32_PLLSRC                        STM32_PLLSRC_HSE_CK
 #define STM32_CKPERSEL                      STM32_CKPERSEL_HSE_CK
 
+#elif STM32_HSECLK == 15000000U
+// 15 MHz HSE -> 2.5 MHz PLL reference clock
+#define STM32_HSE_ENABLED                   TRUE
+#define STM32_HSI_ENABLED                   FALSE
+#define STM32_PLL1_DIVM_VALUE               6
+#define STM32_PLL2_DIVM_VALUE               6
+#define STM32_PLL3_DIVM_VALUE               6
+#define STM32_PLLSRC                        STM32_PLLSRC_HSE_CK
+#define STM32_CKPERSEL                      STM32_CKPERSEL_HSE_CK
+
 #elif STM32_HSECLK == 25000000U
 // 25 MHz HSE -> 2.5 MHz PLL reference clock
 #define STM32_HSE_ENABLED                   TRUE
@@ -185,12 +195,13 @@
 #define STM32_PLL3_DIVQ_VALUE               2
 #define STM32_PLL3_DIVR_VALUE               4
 
-#elif STM32_HSECLK == 25000000U
+#elif (STM32_HSECLK == 15000000U) || (STM32_HSECLK == 25000000U)
 
-// Initial 25 MHz configuration.
-// Keep the CPU at 400 MHz for the first experimental port.
+// 15 MHz or 25 MHz HSE.
+// DIVM gives a 2.5 MHz PLL reference clock.
+// Keep the CPU at 400 MHz for the experimental port.
 #ifdef HAL_CUSTOM_MCU_CLOCKRATE
-#error "Custom MCU clockrate is not supported with 25 MHz HSE yet"
+#error "Custom MCU clockrate is not supported with this HSE configuration yet"
 #endif
 
 #define STM32_PLL1_DIVN_VALUE               160
