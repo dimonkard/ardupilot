@@ -97,10 +97,10 @@ include ../include/minimize_features.inc
 # Initial board bring-up
 # ------------------------------------------------------------
 
-# No logging storage is available yet.
+define HAL_BARO_ALLOW_INIT_NO_BARO 1
+
 define HAL_LOGGING_ENABLED 1
 
-# Not required for initial UART/MAVLink bring-up.
 define AP_RANGEFINDER_ENABLED 0
 define AP_OPTICALFLOW_ENABLED 0
 define AC_PRECLAND_ENABLED 0
