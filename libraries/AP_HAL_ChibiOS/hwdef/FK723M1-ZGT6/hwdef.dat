@@ -25,7 +25,7 @@ OSCILLATOR_HZ 25000000
 # STM32H723ZGT6 has 1 MB internal flash
 FLASH_SIZE_KB 1024
 
-# Reserve first 128 KB for bootloader
+# Initial bring-up uses direct SWD flashing, no bootloader reservation.
 FLASH_RESERVE_START_KB 0
 
 # ChibiOS system timer
@@ -71,5 +71,7 @@ define HAL_STORAGE_SIZE 16384
 # No ADC pins or DMA streams are configured yet.
 define HAL_USE_ADC FALSE
 
+# Reduce firmware size for the 1 MiB internal flash.
+include ../include/minimize_features.inc
 
 define AP_BOOTLOADER_FLASHING_ENABLED 0
