@@ -27,7 +27,7 @@ FLASH_RESERVE_START_KB 0
 
 # !!! KEEP THIS LINE FROM YOUR CURRENT WORKING hwdef.dat !!!
 # Example only:
-# APJ_BOARD_ID AP_HW_XXXXXXXX
+APJ_BOARD_ID AP_HW_FK723M1_ZGT6
 
 
 # ------------------------------------------------------------
