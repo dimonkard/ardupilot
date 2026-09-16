@@ -961,7 +961,7 @@ bool AP_InertialSensor_Invensense::_check_whoami(void)
 {
     uint8_t whoami = 0xFF;
 
-    const bool ok = _dev->read_registers(
+    bool ok = _dev->read_registers(
         MPUREG_WHOAMI,
         &whoami,
         1
@@ -969,46 +969,60 @@ bool AP_InertialSensor_Invensense::_check_whoami(void)
 
     GCS_SEND_TEXT(
         MAV_SEVERITY_CRITICAL,
-        "MPU: I2C=%u WHOAMI=0x%02X",
+        "MPU WHOAMI: ok=%u val=0x%02X",
         unsigned(ok),
         unsigned(whoami)
     );
 
     if (!ok) {
         return false;
+    }
+
     switch (whoami) {
     case MPU_WHOAMI_6000:
         _mpu_type = Invensense_MPU6000;
         return true;
+
     case MPU_WHOAMI_6500:
         _mpu_type = Invensense_MPU6500;
         return true;
+
     case MPU_WHOAMI_MPU9250:
     case MPU_WHOAMI_MPU9255:
         _mpu_type = Invensense_MPU9250;
         return true;
-    case MPU_WHOAMI_20608D:    
+
+    case MPU_WHOAMI_20608D:
     case MPU_WHOAMI_20608G:
         _mpu_type = Invensense_ICM20608;
         return true;
+
     case MPU_WHOAMI_20602:
         _mpu_type = Invensense_ICM20602;
         return true;
+
     case MPU_WHOAMI_20601:
         _mpu_type = Invensense_ICM20601;
         return true;
+
     case MPU_WHOAMI_ICM20789:
     case MPU_WHOAMI_ICM20789_R1:
         _mpu_type = Invensense_ICM20789;
         return true;
+
     case MPU_WHOAMI_ICM20689:
         _mpu_type = Invensense_ICM20689;
         return true;
     }
-    // not a value WHOAMI result
+
+    GCS_SEND_TEXT(
+        MAV_SEVERITY_CRITICAL,
+        "MPU: unknown WHOAMI 0x%02X",
+        unsigned(whoami)
+    );
+
     return false;
 }
-
 
 bool AP_InertialSensor_Invensense::_hardware_init(void)
 {
@@ -1042,6 +1056,21 @@ bool AP_InertialSensor_Invensense::_hardware_init(void)
         /* reset device */
         _register_write(MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
         hal.scheduler->delay(100);
+
+        uint8_t whoami_after_reset = 0xFF;
+
+        bool whoami_after_reset_ok = _dev->read_registers(
+            MPUREG_WHOAMI,
+            &whoami_after_reset,
+            1
+        );
+
+        GCS_SEND_TEXT(
+            MAV_SEVERITY_CRITICAL,
+            "MPU reset: ok=%u who=0x%02X",
+            unsigned(whoami_after_reset_ok),
+            unsigned(whoami_after_reset)
+        );
 
         /* bus-dependent initialization */
         if (_dev->bus_type() == AP_HAL::Device::BUS_TYPE_SPI) {
