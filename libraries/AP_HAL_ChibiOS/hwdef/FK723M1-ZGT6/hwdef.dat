@@ -1,15 +1,93 @@
-# ============================================================
-# FK723M1-ZGT6
+# hw definition file for FK723M1-ZGT6
 # STM32H723ZGT6
-# ============================================================
+#
+# ArduPilot port for FK723M1-ZGT6
+#
+# Enabled:
+#   - STM32H723ZGT6
+#   - 25 MHz external oscillator
+#   - USB
+#   - USART1
+#   - SWD
+#   - User LED
+#   - microSD
+#   - MPU6050 on I2C2
+#   - empty parameter storage
 
 MCU STM32H7xx STM32H723xx
 
+
+# ------------------------------------------------------------
+# Board ID
+# ------------------------------------------------------------
+
+APJ_BOARD_ID AP_HW_FK723M1_ZGT6
+
+
+# ------------------------------------------------------------
+# Clock / flash
+# ------------------------------------------------------------
+
+# External crystal
 OSCILLATOR_HZ 25000000
+
+# STM32H723ZGT6 has 1 MB internal flash
 FLASH_SIZE_KB 1024
 
-# ОСТАВЬ ЗДЕСЬ СВОИ РАБОЧИЕ значения APJ_BOARD_ID
-# и FLASH/bootloader layout из предыдущего hwdef.
+# Current bring-up uses direct SWD flashing.
+FLASH_RESERVE_START_KB 0
+
+
+# ------------------------------------------------------------
+# ChibiOS system timer
+# ------------------------------------------------------------
+
+STM32_ST_USE_TIMER 12
+
+define CH_CFG_ST_RESOLUTION 16
+
+
+# ------------------------------------------------------------
+# Serial ports
+# ------------------------------------------------------------
+
+# USB    = SERIAL0
+# USART1 = SERIAL1
+SERIAL_ORDER OTG1 USART1
+
+
+# USB
+PA11 OTG_HS_DM OTG1
+PA12 OTG_HS_DP OTG1
+
+
+# USART1
+PA9  USART1_TX USART1
+PA10 USART1_RX USART1
+
+
+# ------------------------------------------------------------
+# I2C2 / MPU6050
+# ------------------------------------------------------------
+
+# ArduPilot I2C bus 0 = hardware STM32 I2C2
+I2C_ORDER I2C2
+
+# MPU6050:
+# SCL -> PB10
+# SDA -> PB11
+PB10 I2C2_SCL I2C2
+PB11 I2C2_SDA I2C2
+
+# The MPU6050 is permanently attached to the flight controller
+define HAL_I2C_INTERNAL_MASK 1
+
+# MPU6050 with AD0 connected to GND:
+# I2C address = 0x68
+#
+# ROTATION_NONE assumes MPU6050 axes have the same
+# orientation as the flight-controller axes.
+IMU Invensense I2C:0:0x68 ROTATION_NONE
 
 
 # ------------------------------------------------------------
@@ -21,67 +99,82 @@ PA14 JTCK-SWCLK SWD
 
 
 # ------------------------------------------------------------
-# USB
+# User LED
 # ------------------------------------------------------------
 
-PA11 OTG_HS_DM OTG1
-PA12 OTG_HS_DP OTG1
-
-SERIAL_ORDER OTG1
-
-# No USART/UART yet; USB CDC is a separate driver
-define HAL_USE_SERIAL FALSE
+# FK723M1 user LED is on PG7 and is active-low
+# HAL_GPIO_LED_ON defaults to 0 in ArduPilot.
+PG7 LED OUTPUT HIGH
 
 
 # ------------------------------------------------------------
-# LED
+# microSD
 # ------------------------------------------------------------
 
-PG7 LED_STATUS OUTPUT HIGH
+PC12 SDMMC1_CK  SDMMC1
+PD2  SDMMC1_CMD SDMMC1
 
-define HAL_GPIO_PIN_LED HAL_GPIO_PIN_LED_STATUS
-define HAL_LED_ON 0
+PC8  SDMMC1_D0 SDMMC1
+PC9  SDMMC1_D1 SDMMC1
+PC10 SDMMC1_D2 SDMMC1
+PC11 SDMMC1_D3 SDMMC1
 
-
-# ============================================================
-# MPU6050 / I2C2
-# ============================================================
-
-# ArduPilot I2C bus 0 = STM32 I2C2
-I2C_ORDER I2C2
-
-PB10 I2C2_SCL I2C2
-PB11 I2C2_SDA I2C2
-
-# MPU6050 is a fixed/internal sensor
-define HAL_I2C_INTERNAL_MASK 1
-
-# AD0 -> GND => address 0x68
-IMU Invensense I2C:0:0x68 ROTATION_NONE
+define FATFS_HAL_DEVICE SDCD1
+define HAL_OS_FATFS_IO 1
 
 
 # ------------------------------------------------------------
-# No barometer yet
+# Parameter storage
 # ------------------------------------------------------------
 
-define HAL_BARO_ALLOW_INIT_NO_BARO 1
+# Temporary: no external EEPROM/FRAM yet
+define HAL_USE_EMPTY_STORAGE 1
+define HAL_STORAGE_SIZE 16384
 
 
 # ------------------------------------------------------------
 # ADC
 # ------------------------------------------------------------
 
+# No ADC pins or DMA streams are configured yet.
 define HAL_USE_ADC FALSE
 
 
 # ------------------------------------------------------------
-# Reduce firmware
+# Firmware size reduction
 # ------------------------------------------------------------
 
+# STM32H723ZGT6 has only 1 MiB internal flash.
 include ../include/minimize_features.inc
 
-define HAL_LOGGING_ENABLED 0
+
+# ------------------------------------------------------------
+# Sensors / initial board bring-up
+# ------------------------------------------------------------
+
+# Allow running without a physical barometer
+define HAL_BARO_ALLOW_INIT_NO_BARO 1
+
+
+# ------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------
+
+define HAL_LOGGING_ENABLED 1
+
+
+# ------------------------------------------------------------
+# Currently unused functionality
+# ------------------------------------------------------------
+
 define AP_RANGEFINDER_ENABLED 0
 define AP_OPTICALFLOW_ENABLED 0
 define AC_PRECLAND_ENABLED 0
 define AP_FENCE_ENABLED 0
+
+
+# ------------------------------------------------------------
+# Bootloader flashing
+# ------------------------------------------------------------
+
+define AP_BOOTLOADER_FLASHING_ENABLED 0
