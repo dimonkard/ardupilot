@@ -959,7 +959,23 @@ void AP_InertialSensor_Invensense::_set_filter_register(void)
  */
 bool AP_InertialSensor_Invensense::_check_whoami(void)
 {
-    uint8_t whoami = _register_read(MPUREG_WHOAMI);
+    uint8_t whoami = 0xFF;
+
+    const bool ok = _dev->read_registers(
+        MPUREG_WHOAMI,
+        &whoami,
+        1
+    );
+
+    GCS_SEND_TEXT(
+        MAV_SEVERITY_CRITICAL,
+        "MPU: I2C=%u WHOAMI=0x%02X",
+        unsigned(ok),
+        unsigned(whoami)
+    );
+
+    if (!ok) {
+        return false;
     switch (whoami) {
     case MPU_WHOAMI_6000:
         _mpu_type = Invensense_MPU6000;
