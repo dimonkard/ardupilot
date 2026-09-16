@@ -1,44 +1,15 @@
 # ============================================================
 # FK723M1-ZGT6
-# MCU: STM32H723ZGT6
-# ArduPilot / ArduCopter
+# STM32H723ZGT6
 # ============================================================
-
-
-# ------------------------------------------------------------
-# MCU
-# ------------------------------------------------------------
 
 MCU STM32H7xx STM32H723xx
 
-# FK723M1-ZGT6 has a 25 MHz HSE crystal
 OSCILLATOR_HZ 25000000
-
-# STM32H723ZG has 1 MiB internal Flash
 FLASH_SIZE_KB 1024
 
-# We flash directly from the beginning of internal Flash
-FLASH_RESERVE_START_KB 0
-
-
-# ------------------------------------------------------------
-# BOARD ID
-# ------------------------------------------------------------
-
-# !!! KEEP THIS LINE FROM YOUR CURRENT WORKING hwdef.dat !!!
-# Example only:
-APJ_BOARD_ID AP_HW_FK723M1_ZGT6
-
-
-# ------------------------------------------------------------
-# PARAMETER STORAGE
-# ------------------------------------------------------------
-
-# H723 has 8 x 128 KiB Flash sectors.
-# Keep the last two sectors for parameter storage.
-STORAGE_FLASH_PAGE 6
-
-define HAL_STORAGE_SIZE 16384
+# ОСТАВЬ ЗДЕСЬ СВОИ РАБОЧИЕ значения APJ_BOARD_ID
+# и FLASH/bootloader layout из предыдущего hwdef.
 
 
 # ------------------------------------------------------------
@@ -53,19 +24,19 @@ PA14 JTCK-SWCLK SWD
 # USB
 # ------------------------------------------------------------
 
-# USB connector on FK723M1-ZGT6
 PA11 OTG_HS_DM OTG1
 PA12 OTG_HS_DP OTG1
 
-# Serial0 = USB MAVLink
 SERIAL_ORDER OTG1
 
+# No USART/UART yet; USB CDC is a separate driver
+define HAL_USE_SERIAL FALSE
+
 
 # ------------------------------------------------------------
-# BOARD LED
+# LED
 # ------------------------------------------------------------
 
-# FK723M1-ZGT6 user LED is PG7 and is active-low
 PG7 LED_STATUS OUTPUT HIGH
 
 define HAL_GPIO_PIN_LED HAL_GPIO_PIN_LED_STATUS
@@ -73,53 +44,26 @@ define HAL_LED_ON 0
 
 
 # ============================================================
-# I2C2 — MPU6050
+# MPU6050 / I2C2
 # ============================================================
 
-# Physical connection:
-#
-# MPU6050        FK723M1-ZGT6
-# --------------------------------
-# VCC       ->   3V3
-# GND       ->   GND
-# SCL       ->   B10   (PB10)
-# SDA       ->   B11   (PB11)
-# AD0       ->   GND
-#
-# INT       ->   not connected
-# XDA       ->   not connected
-# XCL       ->   not connected
-
-
-# I2C bus 0 inside ArduPilot = hardware I2C2
+# ArduPilot I2C bus 0 = STM32 I2C2
 I2C_ORDER I2C2
 
-# PB10 = I2C2_SCL
 PB10 I2C2_SCL I2C2
-
-# PB11 = I2C2_SDA
 PB11 I2C2_SDA I2C2
 
-# This is a dedicated onboard/fixed sensor bus
+# MPU6050 is a fixed/internal sensor
 define HAL_I2C_INTERNAL_MASK 1
 
-
-# ------------------------------------------------------------
-# IMU
-# ------------------------------------------------------------
-
-# AD0 -> GND gives MPU6050 address 0x68
-#
-# ROTATION_NONE is correct ONLY if MPU axes are mounted
-# in the same orientation as the flight-controller axes.
+# AD0 -> GND => address 0x68
 IMU Invensense I2C:0:0x68 ROTATION_NONE
 
 
 # ------------------------------------------------------------
-# BAROMETER
+# No barometer yet
 # ------------------------------------------------------------
 
-# Currently there is no barometer.
 define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
 
@@ -127,17 +71,15 @@ define HAL_BARO_ALLOW_INIT_NO_BARO 1
 # ADC
 # ------------------------------------------------------------
 
-# Not used at this stage
 define HAL_USE_ADC FALSE
 
 
-# ============================================================
-# REDUCE FIRMWARE SIZE
-# ============================================================
+# ------------------------------------------------------------
+# Reduce firmware
+# ------------------------------------------------------------
 
 include ../include/minimize_features.inc
 
-# Features currently not required
 define HAL_LOGGING_ENABLED 0
 define AP_RANGEFINDER_ENABLED 0
 define AP_OPTICALFLOW_ENABLED 0
