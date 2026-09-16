@@ -28,6 +28,7 @@
 
 #include "AP_InertialSensor_Invensense.h"
 #include <GCS_MAVLink/GCS.h>
+#include <AP_BoardConfig/AP_BoardConfig.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -961,21 +962,16 @@ bool AP_InertialSensor_Invensense::_check_whoami(void)
 {
     uint8_t whoami = 0xFF;
 
-    bool ok = _dev->read_registers(
+    const bool ok = _dev->read_registers(
         MPUREG_WHOAMI,
         &whoami,
         1
     );
 
-    GCS_SEND_TEXT(
-        MAV_SEVERITY_CRITICAL,
-        "MPU WHOAMI: ok=%u val=0x%02X",
-        unsigned(ok),
-        unsigned(whoami)
-    );
-
     if (!ok) {
-        return false;
+        AP_BoardConfig::config_error(
+            "MPU: WHOAMI I2C read failed"
+        );
     }
 
     switch (whoami) {
@@ -1015,9 +1011,8 @@ bool AP_InertialSensor_Invensense::_check_whoami(void)
         return true;
     }
 
-    GCS_SEND_TEXT(
-        MAV_SEVERITY_CRITICAL,
-        "MPU: unknown WHOAMI 0x%02X",
+    AP_BoardConfig::config_error(
+        "MPU: WHOAMI=0x%02X",
         unsigned(whoami)
     );
 
@@ -1065,12 +1060,18 @@ bool AP_InertialSensor_Invensense::_hardware_init(void)
             1
         );
 
-        GCS_SEND_TEXT(
-            MAV_SEVERITY_CRITICAL,
-            "MPU reset: ok=%u who=0x%02X",
-            unsigned(whoami_after_reset_ok),
-            unsigned(whoami_after_reset)
-        );
+        if (!reset_read_ok) {
+            AP_BoardConfig::config_error(
+                "MPU: I2C lost after reset"
+            );
+        }
+
+        if (whoami_after_reset != MPU_WHOAMI_6000) {
+            AP_BoardConfig::config_error(
+                "MPU: after reset WHO=0x%02X",
+                unsigned(whoami_after_reset)
+            );
+        }
 
         /* bus-dependent initialization */
         if (_dev->bus_type() == AP_HAL::Device::BUS_TYPE_SPI) {
@@ -1114,10 +1115,15 @@ bool AP_InertialSensor_Invensense::_hardware_init(void)
     _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
 
     if (tries == 5) {
-        DEV_PRINTF("Failed to boot Invensense 5 times\n");
-        return false;
-    }
+        const uint8_t pwr = _register_read(MPUREG_PWR_MGMT_1);
+        const uint8_t status = _register_read(MPUREG_INT_STATUS);
 
+        AP_BoardConfig::config_error(
+            "MPU wake fail: PWR=0x%02X ST=0x%02X",
+            unsigned(pwr),
+            unsigned(status)
+        );
+    }
     if (_mpu_type == Invensense_ICM20608 ||
         _mpu_type == Invensense_ICM20602 ||
         _mpu_type == Invensense_ICM20601) {
