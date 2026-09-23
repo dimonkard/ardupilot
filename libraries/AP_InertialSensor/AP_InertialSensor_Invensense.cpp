@@ -1060,7 +1060,7 @@ bool AP_InertialSensor_Invensense::_hardware_init(void)
             1
         );
 
-        if (!reset_read_ok) {
+        if (!whoami_after_reset_ok) {
             AP_BoardConfig::config_error(
                 "MPU: I2C lost after reset"
             );
