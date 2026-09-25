@@ -174,6 +174,23 @@ define AP_FENCE_ENABLED 0
 
 
 # ------------------------------------------------------------
+# Motor outputs
+# ------------------------------------------------------------
+#
+# Motor outputs are located near the MPU6050 I2C pins
+#
+# P2-41 = PE14 = TIM1_CH4
+# P2-40 = PE13 = TIM1_CH3
+# P2-38 = PE11 = TIM1_CH2
+# P2-36 = PE9  = TIM1_CH1
+
+PE14 TIM1_CH4 TIM1 PWM(1) GPIO(50)
+PE13 TIM1_CH3 TIM1 PWM(2) GPIO(51)
+PE11 TIM1_CH2 TIM1 PWM(3) GPIO(52)
+PE9  TIM1_CH1 TIM1 PWM(4) GPIO(53)
+
+
+# ------------------------------------------------------------
 # Bootloader flashing
 # ------------------------------------------------------------
 
